@@ -38,7 +38,7 @@ class ProductController extends Controller
      *         in="path",
      *         required=true,
      *         description="Product ID",
-     *         @OA\Schema(type="integer", format="int64")
+     *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
      *         response=200,
