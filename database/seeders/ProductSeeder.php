@@ -10,7 +10,9 @@ use App\Models\ProductVariant;
 use Illuminate\Database\Seeder;
 use App\Models\Category;
 use App\Models\Attribute;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
@@ -86,10 +88,12 @@ class ProductSeeder extends Seeder
                 'vendor_id'         => $vendors->random()->id,
                 'category_id'       => $category->id,
                 'name'              => "Product " . ($i + 1),
+                'slug'             => Str::slug("Product " . ($i + 1)),
                 'description'       => "Description for product " . ($i + 1),
                 'price'             => rand(10, 1000) + 0.99,
                 'quantity'          => rand(10, 100),
                 'product_status_id' => $statuses->random()->id,
+                'view'              => rand(10 , 100),
                 'created_at'        => now(),
                 'updated_at'        => now(),
             ];
@@ -136,10 +140,11 @@ class ProductSeeder extends Seeder
                 for ($j = 0; $j < $variantCount; $j++) {
                     $variants[] = [
                         'product_id'       => $productId,
-                        'attribute_id'     => $attribute->id,
                         'value'            => $this->generateVariantValue($attribute->name),
+                        'slug'             => Str::slug("Product " . ($i + 1) . $this->generateVariantValue($attribute->name) . '_' . rand(1 , 100)),
                         'additional_price' => rand(0, 1) ? rand(5, 50) : null,
                         'quantity'         => rand(5, 30),
+                        'view'             => rand(10 , 100),
                         'created_at'       => now(),
                         'updated_at'       => now(),
                     ];
@@ -148,13 +153,31 @@ class ProductSeeder extends Seeder
         }
 
         foreach ($products as $productData) {
-            $product = Product::create($productData);
+            $attributeObject = $attributes->shuffle()->first();
+            $product = Product::query()->create($productData);
+
+            $product->attributes()->attach($attributeObject->id, [
+                'value' => $this->generateVariantValue($attributeObject->name),
+                'created_at' => now(),
+                'item_type' => Product::class, // Ensure item_type is set correctly
+            ]);
+
             $this->attachMedia($product);
         }
 
-        // Bulk insert variants, and product-tag relationships
-        ProductVariant::insert($variants);
-        \DB::table('product_tag')->insert($productTags);
+        foreach ($variants as $productVariantData) {
+            $attributeObject = $attributes->shuffle()->first();
+            $productVariant = ProductVariant::query()->create($productVariantData);
+
+            $productVariant->attributes()->attach($attributeObject->id, [
+                'value' => $this->generateVariantValue($attributeObject->name),
+                'created_at' => now(),
+                'item_type' => ProductVariant::class, // Ensure item_type is set correctly
+            ]);
+
+            $this->attachMedia($product);
+        }
+        DB::table('product_tag')->insert($productTags);
     }
 
     private function generateVariantValue(string $attributeName): string

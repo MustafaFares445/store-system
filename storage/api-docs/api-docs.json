@@ -6,6 +6,137 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/home/popular/categories/products": {
+            "get": {
+                "tags": [
+                    "HomePage"
+                ],
+                "summary": "Get popular categories and their products for the homepage",
+                "description": "Retrieves root categories and their most viewed products, including products from child categories",
+                "operationId": "getPopularCategoriesProducts",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "description": "Array of products keyed by category slug",
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/ProductResource"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "electronics": [
+                                        {
+                                            "id": 1,
+                                            "name": "Smartphone",
+                                            "slug": "smartphone",
+                                            "summary": "Latest smartphone model",
+                                            "view": 1500,
+                                            "price": 999.99
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/home/popular/categories/{category}/products": {
+            "get": {
+                "tags": [
+                    "HomePage"
+                ],
+                "summary": "Get popular products from subcategories of a specific category",
+                "description": "Retrieves up to 15 most viewed products from each subcategory, shuffled for display",
+                "operationId": "bde37d1b340dca0e158c44cbdbbb6df3",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "Category slug or ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "category_slug": {
+                                            "description": "Array of products for each category (key is category slug)",
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ProductResource"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/categories": {
             "get": {
                 "tags": [
@@ -128,9 +259,381 @@
                     }
                 }
             }
+        },
+        "/api/products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "List all products",
+                "operationId": "32915df3addd1589458e803964e4a9f1",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProductResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/products/{product}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get product details",
+                "operationId": "9134cf7c4a96799e2c5dddb8174ba828",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "Product ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found"
+                    }
+                }
+            }
         }
     },
     "components": {
+        "schemas": {
+            "AttributeResource": {
+                "title": "Attribute Resource",
+                "description": "Single attribute resource",
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier of the attribute",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "The name of the attribute",
+                        "type": "string",
+                        "example": "Color"
+                    },
+                    "image": {
+                        "$ref": "#/components/schemas/MediaResource"
+                    }
+                },
+                "type": "object"
+            },
+            "MediaResource": {
+                "title": "MediaResource",
+                "description": "Media resource representation for files and images",
+                "required": [
+                    "id",
+                    "name",
+                    "fileName",
+                    "collection",
+                    "url",
+                    "size",
+                    "type",
+                    "extension",
+                    "caption"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for the media",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "Name of the media file without extension",
+                        "type": "string",
+                        "example": "nature_photo"
+                    },
+                    "fileName": {
+                        "description": "Complete file name with extension",
+                        "type": "string",
+                        "example": "nature_photo.jpg"
+                    },
+                    "collection": {
+                        "description": "Collection name where the media is stored",
+                        "type": "string",
+                        "example": "photos"
+                    },
+                    "url": {
+                        "description": "Full URL to access the media file",
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://example.com/storage/media/nature_photo.jpg"
+                    },
+                    "size": {
+                        "description": "Human-readable file size",
+                        "type": "string",
+                        "example": "2.5 MB"
+                    },
+                    "type": {
+                        "description": "Type of media",
+                        "type": "string",
+                        "enum": [
+                            "image",
+                            "video",
+                            "document",
+                            "audio",
+                            "other"
+                        ],
+                        "example": "image"
+                    },
+                    "extension": {
+                        "description": "File extension",
+                        "type": "string",
+                        "example": "jpg"
+                    },
+                    "caption": {
+                        "description": "Caption or description of the media. Falls back to name if not set",
+                        "type": "string",
+                        "example": "Beautiful nature photograph"
+                    },
+                    "width": {
+                        "description": "Width of the image in pixels (only for images)",
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 1920,
+                        "nullable": true
+                    },
+                    "height": {
+                        "description": "Height of the image in pixels (only for images)",
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 1080,
+                        "nullable": true
+                    },
+                    "thumbnailUrl": {
+                        "description": "URL of the thumbnail version. Only present if 'thumb' conversion exists",
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://example.com/storage/media/conversions/nature_photo-thumb.jpg",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProductResource": {
+                "title": "Product Resource",
+                "description": "Product resource representation",
+                "properties": {
+                    "id": {
+                        "description": "Product ID",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "Product name",
+                        "type": "string"
+                    },
+                    "summary": {
+                        "description": "Brief summary of the product",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Detailed description of the product",
+                        "type": "string"
+                    },
+                    "price": {
+                        "description": "Product price",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "quantity": {
+                        "description": "Available quantity",
+                        "type": "integer"
+                    },
+                    "view": {
+                        "description": "Number of product views",
+                        "type": "integer"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/ProductStatusResource"
+                    },
+                    "vendor": {
+                        "description": "Product reviews",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ReviewResource"
+                        }
+                    },
+                    "reviews": {
+                        "description": "Product variants",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/VariantResource"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ProductStatusResource": {
+                "title": "Product Status",
+                "description": "Product status resource",
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier of the product status",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "The name of the product status",
+                        "type": "string",
+                        "example": "Active"
+                    }
+                },
+                "type": "object"
+            },
+            "ReviewResource": {
+                "title": "Review Resource",
+                "description": "Review resource representation",
+                "properties": {
+                    "id": {
+                        "description": "Review ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserResource"
+                    },
+                    "product": {
+                        "$ref": "#/components/schemas/ProductResource"
+                    },
+                    "vendor": {
+                        "$ref": "#/components/schemas/VendorResource"
+                    },
+                    "rating": {
+                        "description": "Rating score (1-5)",
+                        "type": "integer",
+                        "maximum": 5,
+                        "minimum": 1,
+                        "example": 4
+                    },
+                    "comment": {
+                        "description": "Review comment",
+                        "type": "string",
+                        "example": "Great product, excellent service!"
+                    }
+                },
+                "type": "object"
+            },
+            "UserResource": {
+                "title": "User Resource",
+                "description": "User resource representation",
+                "properties": {
+                    "id": {
+                        "description": "User ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "User's full name",
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "description": "User's email address",
+                        "type": "string",
+                        "format": "email",
+                        "example": "john.doe@example.com"
+                    },
+                    "phone": {
+                        "description": "User's phone number",
+                        "type": "string",
+                        "example": "+1234567890"
+                    }
+                },
+                "type": "object"
+            },
+            "VariantResource": {
+                "title": "Variant Resource",
+                "description": "Product variant resource representation",
+                "properties": {
+                    "id": {
+                        "description": "Variant ID",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "product": {
+                        "$ref": "#/components/schemas/ProductResource"
+                    },
+                    "attribute": {
+                        "$ref": "#/components/schemas/AttributeResource"
+                    },
+                    "value": {
+                        "description": "Variant value",
+                        "type": "string"
+                    },
+                    "additionalPrice": {
+                        "description": "Additional price for this variant",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "quantity": {
+                        "description": "Available quantity for this variant",
+                        "type": "integer"
+                    },
+                    "view": {
+                        "description": "Number of variant views",
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "VendorResource": {
+                "title": "Vendor Resource",
+                "description": "Vendor resource representation",
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier of the vendor",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "The name of the vendor",
+                        "type": "string",
+                        "example": "Acme Corporation"
+                    },
+                    "description": {
+                        "description": "Detailed description of the vendor",
+                        "type": "string",
+                        "example": "A leading provider of innovative solutions"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserResource"
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
@@ -140,8 +643,16 @@
     },
     "tags": [
         {
+            "name": "HomePage",
+            "description": "API Endpoints for HomePage"
+        },
+        {
             "name": "Categories",
             "description": "API Endpoints for categories"
+        },
+        {
+            "name": "Products",
+            "description": "Products"
         }
     ]
 }

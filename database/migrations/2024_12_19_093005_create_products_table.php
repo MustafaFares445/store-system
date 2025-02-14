@@ -14,7 +14,9 @@ return new class extends Migration {
             $table->string('name');
             $table->string('summary')->nullable();
             $table->text('description')->nullable();
+            $table->string('slug')->unique();
             $table->decimal('price');
+            $table->unsignedInteger('view')->default(0);
             $table->integer('quantity');
             $table->foreignId('product_status_id')->constrained('product_statuses');
             $table->timestamps();

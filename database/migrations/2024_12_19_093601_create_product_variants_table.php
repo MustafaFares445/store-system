@@ -10,7 +10,8 @@ return new class extends Migration {
         Schema::create('product_variants', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->restrictOnDelete();
-            $table->foreignId('attribute_id')->constrained()->restrictOnDelete();
+            $table->string('slug')->unique();
+            $table->unsignedInteger('view')->default(0);
             $table->string('value');
             $table->decimal('additional_price')->nullable();
             $table->integer('quantity')->nullable();
