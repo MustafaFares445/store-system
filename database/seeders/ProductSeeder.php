@@ -85,7 +85,6 @@ class ProductSeeder extends Seeder
 
             $products[] = [
                 'id'                => $productId,
-                'vendor_id'         => $vendors->random()->id,
                 'category_id'       => $category->id,
                 'name'              => "Product " . ($i + 1),
                 'slug'             => Str::slug("Product " . ($i + 1)),
@@ -97,6 +96,7 @@ class ProductSeeder extends Seeder
                 'created_at'        => now(),
                 'updated_at'        => now(),
             ];
+
 
             // Generate tags for this product
             $selectedTags = [];
@@ -140,7 +140,6 @@ class ProductSeeder extends Seeder
                 for ($j = 0; $j < $variantCount; $j++) {
                     $variants[] = [
                         'product_id'       => $productId,
-                        'value'            => $this->generateVariantValue($attribute->name),
                         'slug'             => Str::slug("Product " . ($i + 1) . $this->generateVariantValue($attribute->name) . '_' . rand(1 , 100)),
                         'additional_price' => rand(0, 1) ? rand(5, 50) : null,
                         'quantity'         => rand(5, 30),
@@ -162,7 +161,10 @@ class ProductSeeder extends Seeder
                 'item_type' => Product::class, // Ensure item_type is set correctly
             ]);
 
+            $product->vendors()->attach($vendors->shuffle()->take(rand(1, $vendors->count()))->pluck('id')->toArray());
+
             $this->attachMedia($product);
+            //$product->addMedia(public_path('images/product.webp'))->preservingOriginal()->toMediaCollection('images');
         }
 
         foreach ($variants as $productVariantData) {
@@ -175,7 +177,9 @@ class ProductSeeder extends Seeder
                 'item_type' => ProductVariant::class, // Ensure item_type is set correctly
             ]);
 
-            $this->attachMedia($product);
+           // $productVariant->addMedia(public_path('images/product.webp'))->preservingOriginal()->toMediaCollection('images');
+            $this->attachMedia($productVariant);
+            $productVariant->vendors()->attach($vendors->shuffle()->take(rand(1, $vendors->count()))->pluck('id')->toArray());
         }
         DB::table('product_tag')->insert($productTags);
     }
@@ -194,12 +198,12 @@ class ProductSeeder extends Seeder
         return $options[array_rand($options)];
     }
 
-    private function attachMedia(Product $product): void
+    private function attachMedia($product): void
     {
         $images = collect(Storage::disk('local')->files('demo-images'));
 
         $product->addMediaFromDisk($images->random())
             ->preservingOriginal()
-            ->toMediaCollection('featured_image');
+            ->toMediaCollection('images');
     }
 }

@@ -87,7 +87,7 @@ class ProductResource extends JsonResource
             'view' => $this->when($this->view , $this->view),
             'primaryImage' => $this->whenLoaded('media' , MediaResource::make($this->getFirstMedia('images'))),
             'status' => ProductStatusResource::make($this->whenLoaded('status')),
-            'vendor' => VendorResource::collection($this->whenLoaded('vendor')),
+            'vendors' => VendorResource::collection($this->whenLoaded('vendors')),
             'variants' => VariantResource::collection($this->whenLoaded('productVariants')),
             'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
             'attributes' => AttributeItemResource::collection($this->whenLoaded('attributes')),

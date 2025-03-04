@@ -62,6 +62,7 @@ class VariantResource extends JsonResource
             'id' => $this->when($this->id , $this->id),
             'product' => ProductResource::make($this->whenLoaded('product')),
             'attribute' => AttributeResource::make($this->whenLoaded('attribute')),
+            'vendors' => VendorResource::collection($this->whenLoaded('vendors')),
             'primaryImage' => $this->whenLoaded('media' , MediaResource::make($this->getFirstMedia('images'))),
             'value' => $this->when($this->value , $this->value),
             'additionalPrice' => $this->when($this->additional_price , $this->additional_price),

@@ -42,11 +42,6 @@ class Product extends Model implements HasMedia
             ->saveSlugsTo('slug');
     }
 
-    public function vendor(): BelongsTo
-    {
-        return $this->belongsTo(Vendor::class);
-    }
-
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -65,6 +60,11 @@ class Product extends Model implements HasMedia
     public function productVariants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
+    }
+    
+    public function vendors(): BelongsToMany
+    {
+        return $this->belongsToMany(Vendor::class);
     }
 
     public function attributes()

@@ -47,7 +47,7 @@ class VendorSeeder extends Seeder
 
         foreach ($vendorsToInsert as $vendorData) {
             $vendor = Vendor::create($vendorData);
-            $this->attachMedia($vendor);
+           $vendor->addMedia(public_path('images/avatar.png'))->preservingOriginal()->toMediaCollection('images');
         }
     }
 
@@ -57,6 +57,6 @@ class VendorSeeder extends Seeder
 
         $vendor->addMediaFromDisk($images->random())
             ->preservingOriginal()
-            ->toMediaCollection('logo');
+            ->toMediaCollection('images');
     }
 }

@@ -4,8 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Spatie\Image\Exceptions\CouldNotLoadImage;
-use Spatie\Image\Image;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\InvalidConversion;
 
 /**
@@ -14,6 +12,7 @@ use Spatie\MediaLibrary\MediaCollections\Exceptions\InvalidConversion;
  *     title="MediaResource",
  *     description="Media resource representation for files and images",
  *     required={"id", "name", "fileName", "collection", "url", "size", "type", "extension", "caption"},
+ *
  *     @OA\Property(
  *         property="id",
  *         type="integer",
@@ -88,47 +87,48 @@ use Spatie\MediaLibrary\MediaCollections\Exceptions\InvalidConversion;
  *         nullable=true
  *     ),
  *     @OA\Property(
- *         property="thumbnailUrl",
+ *         property="thumbnailUrlSmall",
  *         type="string",
  *         format="uri",
- *         description="URL of the thumbnail version. Only present if 'thumb' conversion exists",
- *         example="https://example.com/storage/media/conversions/nature_photo-thumb.jpg",
+ *         description="URL of the thumbnail version. Only present if 'thumb-small' conversion exists",
+ *         example="https://example.com/storage/media/conversions/nature_photo-thumb-small.jpg",
  *         nullable=true
- *     )
+ *     ),
+ *     @OA\Property(
+ *         property="thumbnailUrlMedium",
+ *         type="string",
+ *         format="uri",
+ *         description="URL of the thumbnail version. Only present if 'thumb-medium' conversion exists",
+ *         example="https://example.com/storage/media/conversions/nature_photo-thumb-medium.jpg",
+ *         nullable=true
  * )
  */
-class MediaResource extends JsonResource
+final class MediaResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
-     * @throws CouldNotLoadImage
      */
     public function toArray(Request $request): array
     {
-        $data =  [
+        $data = [
             'id' => $this->id,
             'name' => $this->name,
             'fileName' => $this->file_name,
             'collection' => $this->collection_name,
             'url' => $this->getFullUrl(),
             'size' => $this->human_readable_size,
-            'type' => $this->getTypeAttribute(),
-            'extension' => $this->getExtensionAttribute(),
+            'extension' => $this->extension,
+            'type' => $this->getTypeFromExtension(),
             'caption' => $this->getCustomProperty('caption') ?? $this->name,
         ];
 
-        if ($this->getTypeAttribute() === 'image'){
-            $imageInstance = Image::load($this->getPath());
-            $data['width'] = $imageInstance->getWidth();
-            $data['height'] = $imageInstance->getHeight();
-        }
 
         // Check if the 'thumb' conversion exists
         try {
-            $thumbnailUrl = $this->getFullUrl('thumb');
-            $data['thumbnailUrl'] = $thumbnailUrl;
+            $data['thumbnailUrlSmall'] = $this->getFullUrl('thumb-small');
+            $data['thumbnailUrlMedium'] = $this->getFullUrl('thumb-medium');
         } catch (InvalidConversion $e) {
             // If the 'thumb' conversion does not exist, do not add 'thumbnailUrl'
         }

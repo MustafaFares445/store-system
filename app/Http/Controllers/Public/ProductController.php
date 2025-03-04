@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProductController extends Controller
 {
@@ -54,7 +55,45 @@ class ProductController extends Controller
     public function show(Product $product): ProductResource
     {
         return ProductResource::make(
-            $product->load(['media', 'attributes.media', 'productVariants.media', 'productVariants.attributes.media', 'category.media', 'reviews', 'status'])
+            $product->load([
+                'media', 'attributes.media',
+                'productVariants.media',  'productVariants.attributes',
+                'category.media', 'reviews', 'status'
+            ])
         );
+    }
+
+    public function relatedProducts(Product $product)
+    {
+        $relatedProducts = new Collection();
+
+        $relatedProducts = $product->relatedProducts()
+            ->with(['media'])
+            ->select(['id', 'name', 'slug', 'summary', 'view' , 'price'])
+            ->get();
+
+        if($relatedProducts->count() < 5){
+            $relatedProducts->push($product->vendors()->shuffle()->each(function($vendor){
+                return $vendor->products()
+                    ->with(['media'])
+                    ->select(['id', 'name', 'slug', 'summary', 'view' , 'price']) 
+                    ->shuffle()
+                    ->take(5)
+                    ->get();
+            }));
+        }
+
+        if($relatedProducts->count() < 5){
+            $relatedProducts->push(
+                $product->category()->products()
+                ->with(['media'])
+                ->select(['id', 'name', 'slug', 'summary', 'view' , 'price'])
+                ->shuffle()
+                ->take(5)
+                ->get()
+            );
+        }
+
+        return ProductResource::collection($relatedProducts);
     }
 }

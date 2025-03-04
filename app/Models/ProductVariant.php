@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Spatie\Sluggable\HasSlug;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\Sluggable\HasSlug;
-use Spatie\Sluggable\SlugOptions;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ProductVariant extends Model implements HasMedia
 {
@@ -16,7 +17,6 @@ class ProductVariant extends Model implements HasMedia
 
     protected $fillable = [
         'product_id',
-        'value',
         'additional_price',
         'quantity',
         'view'
@@ -31,11 +31,14 @@ class ProductVariant extends Model implements HasMedia
             ->generateSlugsFrom(function ($model) {
                 // Assuming the Product and Attribute models have a 'name' field
                 $productName = $model->product->name;
-                $attributeName = $model->attribute->name;
-                $value = $model->value;
+                $attributeNameWithValue = '';
+                foreach($model->attributes as $attribute){
+                    $attributeNameWithValue .= $attribute->name . '-' . $attribute->value;
+                }
+              
 
                 // Combine the product name, attribute name, and value to create the slug
-                return "{$productName} {$attributeName} {$value}";
+                return "{$productName} {$attributeNameWithValue}";
             })
             ->saveSlugsTo('slug');
     }
@@ -50,5 +53,10 @@ class ProductVariant extends Model implements HasMedia
         return $this->morphToMany(Attribute::class, 'item' , 'attribute_item')
             ->using(AttributeItem::class)
             ->withPivot('value');
+    }
+
+    public function vendors(): BelongsToMany
+    {
+        return $this->belongsToMany(Vendor::class);
     }
 }

@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Category;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class CategorySeeder extends Seeder
 {
@@ -45,8 +46,12 @@ class CategorySeeder extends Seeder
             ];
         }
 
-        foreach ($categories as $category)
-            Category::query()->create($category);
+        foreach ($categories as $category){
+            $category = Category::query()->create($category);
+
+            $category->addMedia(public_path('images/1.png'))->preservingOriginal()->toMediaCollection('images');
+        }
+           
 
         // Then, insert child categories
         $parentCategories = Category::all()->keyBy('name');
@@ -60,7 +65,21 @@ class CategorySeeder extends Seeder
                 ];
             }
         }
-        foreach ($childCategories as $childCategory)
-            Category::query()->create($childCategory);
+        foreach ($childCategories as $childCategory){
+            $childCategoryObject = Category::query()->create($childCategory);
+
+            
+            $childCategoryObject->addMedia(public_path('images/1.png'))->preservingOriginal()->toMediaCollection('images');
+        }
+
+    }
+
+    private function attachMedia($category): void
+    {
+        $images = collect(Storage::disk('local')->files('demo-images'));
+
+        $category->addMediaFromDisk($images->random())
+            ->preservingOriginal()
+            ->toMediaCollection('images');
     }
 }

@@ -19,7 +19,7 @@ class CategoryResource extends JsonResource
             'name' => $this->when($this->name , $this->name),
             'slug' => $this->when($this->slug , $this->slug),
             'parentSlug' => $this->when($this->parentSlug , $this->parentSlug),
-            'image' => $this->whenLoaded('media' , MediaResource::make($this->getFirstMedia('categories'))),
+            'image' => $this->whenLoaded('media' , MediaResource::make($this->getFirstMedia('images'))),
             'children' => CategoryResource::collection($this->whenLoaded('children')),
             'attributes' => AttributeResource::collection($this->whenLoaded('attributes'))
         ];
