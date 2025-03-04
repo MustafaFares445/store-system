@@ -17,7 +17,7 @@ class AttributeItemResource extends JsonResource
         return [
             'id'      =>  $this->when($this->id , $this->id),
             'name'    =>  $this->when($this->name , $this->name),
-            'image'   =>  $this->whenLoaded('media' , MediaResource::make($this->getFirstMedia('categories'))),
+            'image'   =>  $this->whenLoaded('media' , MediaResource::make($this->getFirstMedia('images'))),
             'value'   =>  $this->when($this->pivot->value , $this->pivot->value),
         ];
     }

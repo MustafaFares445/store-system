@@ -163,6 +163,10 @@ class ProductSeeder extends Seeder
 
             $product->vendors()->attach($vendors->shuffle()->take(rand(1, $vendors->count()))->pluck('id')->toArray());
 
+            if(Product::query()->where('id', '!=', $product->id)->count() > 1){
+                $product->relatedProducts()->attach(Product::query()->where('id', '!=', $product->id)->get()->shuffle()->random(rand(1, Product::query()->where('id', '!=', $product->id)->count()))->pluck('id')->toArray());
+            }
+
             $this->attachMedia($product);
             //$product->addMedia(public_path('images/product.webp'))->preservingOriginal()->toMediaCollection('images');
         }

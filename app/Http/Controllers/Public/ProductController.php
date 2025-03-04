@@ -63,32 +63,58 @@ class ProductController extends Controller
         );
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/products/{product}/related",
+     *     summary="Get related products",
+     *     tags={"Products"},
+     *     @OA\Parameter(
+     *         name="product",
+     *         in="path",
+     *         required=true,
+     *         description="Product slug",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/ProductResource")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Product not found"
+     *     )
+     * )
+     */
     public function relatedProducts(Product $product)
     {
         $relatedProducts = new Collection();
 
         $relatedProducts = $product->relatedProducts()
             ->with(['media'])
-            ->select(['id', 'name', 'slug', 'summary', 'view' , 'price'])
+            ->select(['products.id', 'products.name', 'products.slug', 'products.summary', 'products.view' , 'products.price'])
             ->get();
 
         if($relatedProducts->count() < 5){
-            $relatedProducts->push($product->vendors()->shuffle()->each(function($vendor){
+            $vendorProducts = $product->vendors->flatMap(function($vendor) {
                 return $vendor->products()
                     ->with(['media'])
-                    ->select(['id', 'name', 'slug', 'summary', 'view' , 'price']) 
-                    ->shuffle()
+                    ->select(['products.id', 'products.name', 'products.slug', 'products.summary', 'products.view' , 'products.price'])
                     ->take(5)
                     ->get();
-            }));
+            });
+            
+            $relatedProducts = $relatedProducts->merge($vendorProducts);
         }
 
         if($relatedProducts->count() < 5){
-            $relatedProducts->push(
-                $product->category()->products()
+            $relatedProducts = $relatedProducts->merge(
+                $product->category->products()
                 ->with(['media'])
-                ->select(['id', 'name', 'slug', 'summary', 'view' , 'price'])
-                ->shuffle()
+                ->select(['products.id', 'products.name', 'products.slug', 'products.summary', 'products.view' , 'products.price'])
                 ->take(5)
                 ->get()
             );

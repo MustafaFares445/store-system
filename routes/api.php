@@ -18,4 +18,5 @@ Route::prefix('/home')->group(function (){
 Route::prefix('/products')->group(function (){
     Route::get('', [ProductController::class , 'index']);
     Route::get('/{product:slug}', [ProductController::class , 'show']);
+    Route::get('/{product:slug}/related', [ProductController::class , 'relatedProducts']);
 });

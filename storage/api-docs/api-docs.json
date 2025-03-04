@@ -318,6 +318,44 @@
                     }
                 }
             }
+        },
+        "/api/products/{product}/related": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get related products",
+                "operationId": "636102295da704512285434c07c20535",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "Product slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProductResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -426,11 +464,18 @@
                         "example": 1080,
                         "nullable": true
                     },
-                    "thumbnailUrl": {
-                        "description": "URL of the thumbnail version. Only present if 'thumb' conversion exists",
+                    "thumbnailUrlSmall": {
+                        "description": "URL of the thumbnail version. Only present if 'thumb-small' conversion exists",
                         "type": "string",
                         "format": "uri",
-                        "example": "https://example.com/storage/media/conversions/nature_photo-thumb.jpg",
+                        "example": "https://example.com/storage/media/conversions/nature_photo-thumb-small.jpg",
+                        "nullable": true
+                    },
+                    "thumbnailUrlMedium": {
+                        "description": "URL of the thumbnail version. Only present if 'thumb-medium' conversion exists",
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://example.com/storage/media/conversions/nature_photo-thumb-medium.jpg",
                         "nullable": true
                     }
                 },

@@ -101,6 +101,7 @@ use Spatie\MediaLibrary\MediaCollections\Exceptions\InvalidConversion;
  *         description="URL of the thumbnail version. Only present if 'thumb-medium' conversion exists",
  *         example="https://example.com/storage/media/conversions/nature_photo-thumb-medium.jpg",
  *         nullable=true
+ *    )
  * )
  */
 final class MediaResource extends JsonResource

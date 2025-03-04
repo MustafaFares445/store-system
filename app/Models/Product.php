@@ -32,6 +32,10 @@ class Product extends Model implements HasMedia
         'slug'
     ];
 
+    protected $casts = [
+        'price' => 'float',
+    ];
+
     /**
      * Get the options for generating the slug.
      */
@@ -72,5 +76,10 @@ class Product extends Model implements HasMedia
         return $this->morphToMany(Attribute::class, 'item' , 'attribute_item')
             ->using(AttributeItem::class)
             ->withPivot('value');
+    }
+
+    public function relatedProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'related_products', 'product_id', 'related_product_id');
     }
 }
