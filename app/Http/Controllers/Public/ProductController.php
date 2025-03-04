@@ -57,7 +57,7 @@ class ProductController extends Controller
         return ProductResource::make(
             $product->load([
                 'media', 'attributes.media',
-                'productVariants.media',  'productVariants.attributes',
+                'productVariants.media',  'productVariants.attributes.media',
                 'category.media', 'reviews', 'status'
             ])
         );
