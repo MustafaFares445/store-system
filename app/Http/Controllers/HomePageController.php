@@ -96,7 +96,7 @@ class HomePageController extends Controller
             $data[$category->slug] = ProductResource::collection($products->shuffle());
         }
 
-        return response()->json($data);
+        return response()->json(['data' => $data]);
     }
 
     /**
@@ -154,6 +154,6 @@ class HomePageController extends Controller
             $data[$category->slug] = ProductResource::collection($products->shuffle());
         }
 
-        return response()->json($data);
+        return response()->json(['data' => $data]);
     }
 }
