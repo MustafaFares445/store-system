@@ -74,12 +74,12 @@ class HomePageController extends Controller
             ->select(['id', 'slug'])
             ->with('children')
             ->get();
-    
+
         $data = [];
         foreach ($categories as $category) {
             $childIds = $category->children->pluck('id')->toArray();
             $ids = array_merge([$category->id], $childIds);
-    
+
             $products = Product::with('media')
                 ->select(['id', 'name', 'slug', 'summary', 'view', 'price'])
                 ->whereHas('category', function (Builder $query) use ($ids) {
@@ -88,11 +88,13 @@ class HomePageController extends Controller
                 ->orderByDesc('view')
                 ->limit(15)
                 ->get();
-    
-            // Assign products directly to the category slug key
-            $data[$category->slug] = ProductResource::collection($products->shuffle());
+
+            // Assign products directly to the category slug key in an array format
+            $data[] = [
+                $category->slug => ProductResource::collection($products->shuffle())
+            ];
         }
-    
+
         return response()->json(['data' => $data]);
     }
 
@@ -148,7 +150,9 @@ class HomePageController extends Controller
                 ->limit(15)
                 ->get();
 
-            $data[$category->slug] = ProductResource::collection($products->shuffle());
+            $data[] = [
+                $category->slug => ProductResource::collection($products->shuffle())
+            ];
         }
 
         return response()->json(['data' => $data]);
