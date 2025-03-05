@@ -93,7 +93,7 @@ class HomePageController extends Controller
                 ->get();
 
 
-            $data[$category->slug][] = ProductResource::collection($products->shuffle());
+            $data[$category->slug] = ProductResource::collection($products->shuffle());
         }
 
         return response()->json(['data' => $data]);
