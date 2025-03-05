@@ -70,18 +70,21 @@ class HomePageController extends Controller
      */
     public function popularCategoriesProducts(): JsonResponse
     {
+        // Eager load children along with media and attributes for all root categories.
         $categories = Category::root()
-            ->select(['id', 'slug'])
+            ->select(['id' , 'slug'])
             ->with('children')
             ->get();
 
         $data = [];
         foreach ($categories as $category) {
+            // use the preloaded children relation.
             $childIds = $category->children->pluck('id')->toArray();
+            // Merge parent ID with its children IDs.
             $ids = array_merge([$category->id], $childIds);
 
             $products = Product::with('media')
-                ->select(['id', 'name', 'slug', 'summary', 'view', 'price'])
+                ->select(['id', 'name', 'slug', 'summary', 'view' , 'price'])
                 ->whereHas('category', function (Builder $query) use ($ids) {
                     $query->whereIn('category_id', $ids);
                 })
@@ -89,13 +92,11 @@ class HomePageController extends Controller
                 ->limit(15)
                 ->get();
 
-            // Assign products directly to the category slug key in an array format
-            $data[] = [
-                $category->slug => ProductResource::collection($products->shuffle())
-            ];
+
+            $data[$category->slug] = ProductResource::collection($products->shuffle());
         }
 
-        return response()->json(['data' => $data]);
+        return response()->json($data);
     }
 
     /**
@@ -150,11 +151,9 @@ class HomePageController extends Controller
                 ->limit(15)
                 ->get();
 
-            $data[] = [
-                $category->slug => ProductResource::collection($products->shuffle())
-            ];
+            $data[$category->slug] = ProductResource::collection($products->shuffle());
         }
 
-        return response()->json(['data' => $data]);
+        return response()->json($data);
     }
 }
