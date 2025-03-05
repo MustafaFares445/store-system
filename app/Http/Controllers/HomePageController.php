@@ -76,7 +76,7 @@ class HomePageController extends Controller
             ->with('children')
             ->get();
 
-        $data[] = [];
+        $data = [];
         foreach ($categories as $category) {
             // use the preloaded children relation.
             $childIds = $category->children->pluck('id')->toArray();
@@ -93,7 +93,8 @@ class HomePageController extends Controller
                 ->get();
 
 
-            $data[$category->slug] = ProductResource::collection($products->shuffle());
+
+            $data[][$category->slug] = ProductResource::collection($products->shuffle());
         }
 
         return response()->json(['data' => $data]);
