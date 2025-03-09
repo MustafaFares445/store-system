@@ -73,7 +73,9 @@ class HomePageController extends Controller
         // Eager load children along with media and attributes for all root categories.
         $categories = Category::root()
             ->select(['id' , 'slug'])
-            ->with('children')
+            ->with(['children' => function($query){
+                 $query->select('id');
+            }])
             ->get();
 
         $data = [];
@@ -83,7 +85,7 @@ class HomePageController extends Controller
             // Merge parent ID with its children IDs.
             $ids = array_merge([$category->id], $childIds);
 
-            $products = Product::with('media')
+            $products = Product::with(['media' , 'attributes'])
                 ->select(['id', 'name', 'slug', 'summary', 'view' , 'price'])
                 ->whereHas('category', function (Builder $query) use ($ids) {
                     $query->whereIn('category_id', $ids);
