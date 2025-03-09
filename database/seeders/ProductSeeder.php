@@ -87,7 +87,7 @@ class ProductSeeder extends Seeder
                 'id'                => $productId,
                 'category_id'       => $category->id,
                 'name'              => "Product " . ($i + 1),
-                'summary'           =>  Str::random(),
+                'summary'           => "Summary for product " . ($i + 1),
                 'slug'              => Str::slug("Product " . ($i + 1)),
                 'description'       => "Description for product " . ($i + 1),
                 'price'             => rand(10, 1000) + 0.99,
