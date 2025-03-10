@@ -156,7 +156,7 @@ class ProductSeeder extends Seeder
         
         foreach ($products as $productData) {
             
-            $attributesObjects = $attributes->shuffle()->take(rand(2 , Attribute::query()->count()))->get();
+            $attributesObjects = $attributes->shuffle()->take(rand(2 , Attribute::query()->count()));
             $product = Product::query()->create($productData);
 
             foreach($attributesObjects as $attributeObject){

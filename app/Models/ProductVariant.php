@@ -16,6 +16,8 @@ class ProductVariant extends Model implements HasMedia
     use HasFactory , HasSlug , InteractsWithMedia;
 
     protected $fillable = [
+        'name',
+        'slug',
         'product_id',
         'additional_price',
         'quantity',
