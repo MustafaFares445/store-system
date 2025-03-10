@@ -60,6 +60,7 @@ class VariantResource extends JsonResource
     {
         return [
             'id' => $this->when($this->id , $this->id),
+            'name' => $this->when($this->name  , $this->name),
             'product' => ProductResource::make($this->whenLoaded('product')),
             'attribute' => AttributeResource::make($this->whenLoaded('attribute')),
             'vendors' => VendorResource::collection($this->whenLoaded('vendors')),
