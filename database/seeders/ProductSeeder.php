@@ -140,6 +140,7 @@ class ProductSeeder extends Seeder
                 $variantCount = rand(2, 4);
                 for ($j = 0; $j < $variantCount; $j++) {
                     $variants[] = [
+                        'name'             => Str::slug("Product " . ($i + 1) . $this->generateVariantValue($attribute->name) . '_' . rand(1 , 100)), 
                         'product_id'       => $productId,
                         'slug'             => Str::slug("Product " . ($i + 1) . $this->generateVariantValue($attribute->name) . '_' . rand(1 , 100)),
                         'additional_price' => rand(0, 1) ? rand(5, 50) : null,
@@ -152,24 +153,29 @@ class ProductSeeder extends Seeder
             }
         }
 
+        
         foreach ($products as $productData) {
-            $attributeObject = $attributes->shuffle()->first();
+            
+            $attributesObjects = $attributes->shuffle()->take(rand(2 , Attribute::query()->count()))->get();
             $product = Product::query()->create($productData);
 
-            $product->attributes()->attach($attributeObject->id, [
-                'value' => $this->generateVariantValue($attributeObject->name),
-                'created_at' => now(),
-                'item_type' => Product::class, // Ensure item_type is set correctly
-            ]);
-
+            foreach($attributesObjects as $attributeObject){
+                $product->attributes()->attach($attributeObject->id, [
+                    'value' => $this->generateVariantValue($attributeObject->name),
+                    'created_at' => now(),
+                    'item_type' => Product::class, // Ensure item_type is set correctly
+                ]);    
+            }
+            
             $product->vendors()->attach($vendors->shuffle()->take(rand(1, $vendors->count()))->pluck('id')->toArray());
 
             if(Product::query()->where('id', '!=', $product->id)->count() > 1){
                 $product->relatedProducts()->attach(Product::query()->where('id', '!=', $product->id)->get()->shuffle()->random(rand(1, Product::query()->where('id', '!=', $product->id)->count()))->pluck('id')->toArray());
             }
 
-            $this->attachMedia($product);
-            //$product->addMedia(public_path('images/product.webp'))->preservingOriginal()->toMediaCollection('images');
+            for($i = 0 ;  $i <= 5 ; $i++)
+                $this->attachMedia($product);
+    
         }
 
         foreach ($variants as $productVariantData) {
@@ -182,10 +188,13 @@ class ProductSeeder extends Seeder
                 'item_type' => ProductVariant::class, // Ensure item_type is set correctly
             ]);
 
-           // $productVariant->addMedia(public_path('images/product.webp'))->preservingOriginal()->toMediaCollection('images');
-            $this->attachMedia($productVariant);
+           
+           for($i = 0 ;  $i <= 5 ; $i++)
+                $this->attachMedia($productVariant);
+    
             $productVariant->vendors()->attach($vendors->shuffle()->take(rand(1, $vendors->count()))->pluck('id')->toArray());
         }
+
         DB::table('product_tag')->insert($productTags);
     }
 

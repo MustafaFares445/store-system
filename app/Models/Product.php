@@ -53,7 +53,7 @@ class Product extends Model implements HasMedia
 
     public function status(): BelongsTo
     {
-        return $this->belongsTo(ProductStatus::class);
+        return $this->belongsTo(ProductStatus::class , 'product_status_id');
     }
 
     public function reviews(): HasMany
